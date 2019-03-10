@@ -15,7 +15,7 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Hotel> getOne(){
         Hotel hotel = new Hotel();
-        hotel.setId(1);
+        hotel.setId(1L);
         hotel.setName("name");
         hotel.setDescription("desc");
         return new ResponseEntity<Hotel>(hotel, HttpStatus.CREATED);
