@@ -10,6 +10,7 @@ import me.annaisakova.booking.service.BookingService;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,6 +86,27 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Room bookRoom(@NotNull Long roomId, BookingDate bookingDate) {
-        return null;
+        return roomRepository.findById(roomId)
+                .map(room -> {
+                    validateBookingDate(room, bookingDate);
+                    room.getBookingDates().add(bookingDate);
+                    return roomRepository.saveAndFlush(room);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("No room was found"));
+    }
+
+    private void validateBookingDate(Room room, BookingDate bookingDate) {
+        Date from = bookingDate.getBookedFrom();
+        Date to = bookingDate.getBookedTo();
+        room.getBookingDates().forEach(date -> {
+            if (from.after(to))
+                throw new IllegalArgumentException("Date from cannot be after date to");
+            else if (from.equals(date.getBookedFrom()) || to.equals(date.getBookedTo()))
+                throw new IllegalArgumentException("Room is busy");
+            else if (from.before(date.getBookedFrom()) && to.after(date.getBookedFrom()))
+                throw new IllegalArgumentException("Room is busy");
+            else if (from.after(date.getBookedFrom()) && from.before(date.getBookedTo()))
+                throw new IllegalArgumentException("Room is busy");
+        });
     }
 }

@@ -22,4 +22,7 @@ public class BookingDate {
     @NotNull
     @Column(nullable = false)
     private Date bookedTo;
+
+    @Column
+    private String comment;
 }
