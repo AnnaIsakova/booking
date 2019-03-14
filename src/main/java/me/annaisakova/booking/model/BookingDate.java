@@ -23,6 +23,9 @@ public class BookingDate {
     @Column(nullable = false)
     private Date bookedTo;
 
+    @NotNull
+    private Long userId;
+
     @Column
     private String comment;
 }
