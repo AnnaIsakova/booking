@@ -56,14 +56,9 @@ public class BookingController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/rooms")
     public ResponseEntity<Room> createRoom(@PathVariable Long hotelId, @RequestBody Room room) {
         return new ResponseEntity<>(bookingService.addRoom(hotelId, room), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/{id}")
-    public ResponseEntity<List<Room>> createRooms(@PathVariable Long hotelId, @RequestBody List<Room> rooms) {
-        return new ResponseEntity<>(bookingService.addRooms(hotelId, rooms), HttpStatus.CREATED);
     }
 
     @PostMapping("/{hotelId}/rooms/{roomId}")
