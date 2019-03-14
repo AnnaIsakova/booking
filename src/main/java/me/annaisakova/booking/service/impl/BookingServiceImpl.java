@@ -78,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
     public List<Room> addRooms(@NotNull Long hotelId, List<Room> rooms) {
         return hotelRepository.findById(hotelId)
                 .map(hotel -> {
-                    rooms.parallelStream().forEach(room -> room.setHotel(hotel));
+                    rooms.forEach(room -> room.setHotel(hotel));
                     return roomRepository.saveAll(rooms);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("No hotel was found"));
