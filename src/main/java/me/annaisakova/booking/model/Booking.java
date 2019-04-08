@@ -1,19 +1,24 @@
 package me.annaisakova.booking.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+
 @Data
-@EqualsAndHashCode
-@ToString
-@Embeddable
-public class BookingDate {
+@Entity
+@Table(name = "bookings")
+public class Booking {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "roomId")
+    private Room room;
 
     @NotNull
     @Column(nullable = false)

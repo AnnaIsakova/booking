@@ -1,9 +1,11 @@
 package me.annaisakova.booking.service.impl;
 
 
-import me.annaisakova.booking.model.BookingDate;
+import lombok.RequiredArgsConstructor;
+import me.annaisakova.booking.model.Booking;
 import me.annaisakova.booking.model.Hotel;
 import me.annaisakova.booking.model.Room;
+import me.annaisakova.booking.repository.BookingRepository;
 import me.annaisakova.booking.repository.HotelRepository;
 import me.annaisakova.booking.repository.RoomRepository;
 import me.annaisakova.booking.service.BookingService;
@@ -14,16 +16,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class BookingServiceImpl implements BookingService {
 
     private final HotelRepository hotelRepository;
     private final RoomRepository roomRepository;
+    private final BookingRepository bookingRepository;
 
-    public BookingServiceImpl(HotelRepository hotelRepository, RoomRepository roomRepository) {
-        this.hotelRepository = hotelRepository;
-        this.roomRepository = roomRepository;
-    }
 
     // ===========HOTEL===========
     @Override
@@ -38,18 +38,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Hotel createHotel(Hotel hotel) {
-        return hotelRepository.saveAndFlush(hotel);
+        return hotelRepository.save(hotel);
     }
 
     @Override
     public Hotel updateHotel(Hotel hotel) {
-        return hotelRepository.saveAndFlush(hotel);
+        return hotelRepository.save(hotel);
     }
 
     // ===========ROOM===========
     @Override
-    public Optional<Room> getRoomById(@NotNull Long roomId) {
-        return roomRepository.findById(roomId);
+    public Optional<Room> getRoomById(@NotNull Long hotelId, @NotNull Long roomId) {
+        return roomRepository.findById(roomId)
+                .filter(room -> room.getHotel().getId().equals(hotelId));
     }
 
     @Override
@@ -64,14 +65,14 @@ public class BookingServiceImpl implements BookingService {
         return hotelRepository.findById(hotelId)
                 .map(hotel -> {
                     room.setHotel(hotel);
-                    return roomRepository.saveAndFlush(room);
+                    return roomRepository.save(room);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("No hotel was found"));
     }
 
     @Override
     public Room updateRoom(Room room) {
-        return roomRepository.saveAndFlush(room);
+        return roomRepository.save(room);
     }
 
     @Override
@@ -85,20 +86,26 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Room bookRoom(@NotNull Long roomId, BookingDate bookingDate) {
+    public Booking bookRoom(@NotNull Long hotelId, @NotNull Long roomId, Booking booking) {
         return roomRepository.findById(roomId)
+                .filter(room -> room.getHotel().getId().equals(hotelId))
                 .map(room -> {
-                    validateBookingDate(room, bookingDate);
-                    room.getBookingDates().add(bookingDate);
-                    return roomRepository.saveAndFlush(room);
+                    validateBookingDate(room, booking);
+                    booking.setRoom(room);
+                    return bookingRepository.save(booking);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("No room was found"));
     }
 
-    private void validateBookingDate(Room room, BookingDate bookingDate) {
-        Date from = bookingDate.getBookedFrom();
-        Date to = bookingDate.getBookedTo();
-        room.getBookingDates().forEach(date -> {
+    @Override
+    public List<Booking> getAllBookingsForUser(Long userId) {
+        return bookingRepository.findAllByUserId(userId);
+    }
+
+    private void validateBookingDate(Room room, Booking booking) {
+        Date from = booking.getBookedFrom();
+        Date to = booking.getBookedTo();
+        room.getBookings().forEach(date -> {
             if (from.after(to))
                 throw new IllegalArgumentException("Date from cannot be after date to");
             else if (from.equals(date.getBookedFrom()) || to.equals(date.getBookedTo()))

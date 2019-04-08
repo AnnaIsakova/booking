@@ -46,10 +46,6 @@ public class Room {
     )
     private List<RoomAccommodation> accommodations;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "room_bookingDates",
-            joinColumns = @JoinColumn(name = "roomId")
-    )
-    private List<BookingDate> bookingDates;
+    @OneToMany(mappedBy = "room")
+    private List<Booking> bookings;
 }
