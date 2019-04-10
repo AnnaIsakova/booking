@@ -11,6 +11,7 @@ import me.annaisakova.booking.repository.RoomRepository;
 import me.annaisakova.booking.service.BookingService;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;

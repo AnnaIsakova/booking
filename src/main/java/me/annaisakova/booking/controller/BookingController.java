@@ -71,6 +71,7 @@ public class BookingController {
 
     @GetMapping("/bookings/{userId}")
     public ResponseEntity<List<Booking>> getAllBookings(@PathVariable Long userId){
+        System.out.println("OKKKKKKKKK CALLED " + System.currentTimeMillis() / 1000);
         return new ResponseEntity<>(bookingService.getAllBookingsForUser(userId), HttpStatus.OK);
     }
 }
