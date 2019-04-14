@@ -1,6 +1,8 @@
 package me.annaisakova.booking.controller;
 
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import lombok.RequiredArgsConstructor;
 import me.annaisakova.booking.model.Booking;
 import me.annaisakova.booking.model.Hotel;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Random;
 
 @RequiredArgsConstructor
 @RestController
@@ -69,11 +72,40 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.bookRoom(hotelId, roomId, booking), HttpStatus.CREATED);
     }
 
+    @HystrixCommand(
+            commandProperties = {
+                    @HystrixProperty(
+                            name = "execution.isolation.thread.timeoutInMilliseconds",
+                            value = "100"
+                    )
+            },
+            fallbackMethod = "getAllBookingsFallback",
+            threadPoolKey = "getAllBookingsThreadPool",
+            threadPoolProperties = {
+                    @HystrixProperty(
+                            name = "coreSize",
+                            value = "10"
+                    ),
+                    @HystrixProperty(
+                            name = "maxQueueSize",
+                            value = "5"
+                    )
+            }
+    )
     @GetMapping("/bookings/{userId}")
-    public ResponseEntity<List<Booking>> getAllBookings(@PathVariable Long userId){
-        System.out.println("OKKKKKKKKK CALLED " + System.currentTimeMillis() / 1000);
-        return new ResponseEntity<>(bookingService.getAllBookingsForUser(userId), HttpStatus.OK);
+    public String getAllBookings(@PathVariable Long userId) throws InterruptedException {
+        System.out.println("BOOKING MS CALLED " + System.currentTimeMillis() / 1000);
+        Random random = new Random();
+        if (random.nextBoolean()) {
+            Thread.sleep(200);
+        }
+        return "Ok";
     }
+
+    public String getAllBookingsFallback(Long userId) {
+        return "Fallback";
+    }
+
 }
 
 
